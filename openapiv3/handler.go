@@ -2,7 +2,6 @@ package openapiv3
 
 import (
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"io"
 	"io/fs"
@@ -20,7 +19,9 @@ var (
 
 // NewHandler creates HTTP handler for Swagger UI.
 func NewHandler(handlerOpts ...HandlerOption) http.Handler {
-	opts := &options{}
+	opts := &options{
+		basePath: "/q/swagger-ui/",
+	}
 
 	r := mux.NewRouter()
 
@@ -36,12 +37,10 @@ func NewHandler(handlerOpts ...HandlerOption) http.Handler {
 		Content: []byte("There is your openapi.yaml file."),
 	}
 
-	if h.BasePath != "" {
-		// h.BasePath = strings.TrimSuffix(opts.BasePath, "/") + "/"
-
-		h.BasePath = "/q/swagger-ui/"
-	}
-	fmt.Println("BasePath: ", h.options.BasePath)
+	// if h.BasePath != "" {
+	// 	// h.BasePath = strings.TrimSuffix(opts.BasePath, "/") + "/"
+	// 	h.BasePath = "/q/swagger-ui/"
+	// }
 
 	if h.LocalOpenAPIFile != "" {
 		content, err := openFileHandler.load(h.options.LocalOpenAPIFile)
@@ -52,7 +51,6 @@ func NewHandler(handlerOpts ...HandlerOption) http.Handler {
 		h.options.SwaggerJSON = defaultOpenAPIPath
 	}
 
-	fmt.Println("content: ", string(openFileHandler.Content))
 	r.Handle(defaultOpenAPIPath, openFileHandler).Methods("GET")
 
 	js, err := json.Marshal(h.options)
@@ -78,8 +76,8 @@ func NewHandler(handlerOpts ...HandlerOption) http.Handler {
 		panic(err)
 	}
 
-	h.staticServer = http.StripPrefix(h.BasePath, http.FileServer(http.FS(stripped)))
-	r.PathPrefix(h.BasePath).Handler(h)
+	h.staticServer = http.StripPrefix(h.basePath, http.FileServer(http.FS(stripped)))
+	r.PathPrefix(h.basePath).Handler(h)
 
 	return r
 }
@@ -237,7 +235,7 @@ func (h *handler) LoadIndexTpl() error {
 
 // ServeHTTP implements http.Handler interface to handle swagger UI request.
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if strings.TrimSuffix(r.URL.Path, "/") != strings.TrimSuffix(h.BasePath, "/") && h.staticServer != nil {
+	if strings.TrimSuffix(r.URL.Path, "/") != strings.TrimSuffix(h.basePath, "/") && h.staticServer != nil {
 		h.staticServer.ServeHTTP(w, r)
 
 		return

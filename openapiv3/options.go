@@ -1,7 +1,7 @@
 package openapiv3
 
 type options struct {
-	BasePath    string `json:"basePath"`       // Base URL to docs.
+	basePath    string `json:"basePath"`       // Base URL to docs.
 	Title       string `json:"title"`          // Title of index file.
 	SwaggerJSON string `json:"swaggerJsonUrl"` // URL to openapi.json/swagger.json document specification.
 
@@ -24,6 +24,13 @@ type options struct {
 
 type HandlerOption func(opt *options)
 
+// // WithBasePath sets base URL to docs.
+// func WithBasePath(basePath string) HandlerOption {
+// 	return func(opt *options) {
+// 		opt.basePath = basePath
+// 	}
+// }
+
 // WithTitle sets title of index file.
 func WithTitle(title string) HandlerOption {
 	return func(opt *options) {
@@ -35,13 +42,6 @@ func WithTitle(title string) HandlerOption {
 func WithSwaggerJSON(url string) HandlerOption {
 	return func(opt *options) {
 		opt.SwaggerJSON = url
-	}
-}
-
-// WithBasePath sets base URL to docs.
-func WithBasePath(basePath string) HandlerOption {
-	return func(opt *options) {
-		opt.BasePath = basePath
 	}
 }
 

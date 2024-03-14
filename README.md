@@ -20,7 +20,7 @@ import (
 
 func main() {
 	router := openapiv3.NewHandler(
-		openapiv3.WithBasePath("/q/swagger-ui/"),
+		// openapiv3.WithBasePath("/q/swagger-ui/"),
 		openapiv3.WithTitle("Petstore"),
 		openapiv3.WithLocalFile("./openapi.yaml"),
 		// openapiv3.WithSwaggerJSON("https://petstore3.swagger.io/api/v3/openapi.json"),
@@ -33,7 +33,6 @@ func main() {
 
 	log.Fatal(srv.ListenAndServe())
 }
-
 ```
 
 ## How To Generate Embedded Assets
