@@ -18,6 +18,8 @@ type options struct {
 	// Overrides default values.
 	// See https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/ for available options.
 	SettingsUI map[string]string `json:"-"`
+
+	LocalOpenAPIFile string `json:"-"` // Local openapi file path.
 }
 
 type HandlerOption func(opt *options)
@@ -87,5 +89,11 @@ func WithPreAuthorizeAPIKey(securityName, key string) HandlerOption {
 func WithSettingsUI(settings map[string]string) HandlerOption {
 	return func(opt *options) {
 		opt.SettingsUI = settings
+	}
+}
+
+func WithLocalFile(filePath string) HandlerOption {
+	return func(opt *options) {
+		opt.LocalOpenAPIFile = filePath
 	}
 }

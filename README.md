@@ -19,14 +19,19 @@ import (
 )
 
 func main() {
-
-	http.Handle("/docs/", openapiv3.NewHandler(
-		openapiv3.WithBasePath("/docs/"),
+	router := openapiv3.NewHandler(
+		openapiv3.WithBasePath("/q/swagger-ui/"),
 		openapiv3.WithTitle("Petstore"),
-		openapiv3.WithSwaggerJSON("https://petstore3.swagger.io/api/v3/openapi.json"),
-	))
+		openapiv3.WithLocalFile("./openapi.yaml"),
+		// openapiv3.WithSwaggerJSON("https://petstore3.swagger.io/api/v3/openapi.json"),
+	)
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	srv := &http.Server{
+		Handler: router,
+		Addr:    "127.0.0.1:8080",
+	}
+
+	log.Fatal(srv.ListenAndServe())
 }
 
 ```

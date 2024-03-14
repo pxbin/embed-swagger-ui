@@ -2,38 +2,58 @@ package openapiv3
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
+	"io"
 	"io/fs"
 	"net/http"
+	"os"
 	"sort"
 	"strings"
+
+	"github.com/gorilla/mux"
 )
 
-// handler handles swagger UI request.
-type handler struct {
-	*options
-
-	ConfigJSON template.JS
-
-	tpl          *template.Template
-	staticServer http.Handler
-}
+var (
+	defaultOpenAPIPath = "/q/openapi.yaml"
+)
 
 // NewHandler creates HTTP handler for Swagger UI.
 func NewHandler(handlerOpts ...HandlerOption) http.Handler {
 	opts := &options{}
 
+	r := mux.NewRouter()
+
 	for _, o := range handlerOpts {
 		o(opts)
-	}
-
-	if opts.BasePath != "" {
-		opts.BasePath = strings.TrimSuffix(opts.BasePath, "/") + "/"
 	}
 
 	h := &handler{
 		options: opts,
 	}
+
+	openFileHandler := &openFileHandler{
+		Content: []byte("There is your openapi.yaml file."),
+	}
+
+	if h.BasePath != "" {
+		// h.BasePath = strings.TrimSuffix(opts.BasePath, "/") + "/"
+
+		h.BasePath = "/q/swagger-ui/"
+	}
+	fmt.Println("BasePath: ", h.options.BasePath)
+
+	if h.LocalOpenAPIFile != "" {
+		content, err := openFileHandler.load(h.options.LocalOpenAPIFile)
+		if err != nil {
+			panic(err)
+		}
+		openFileHandler.Content = content
+		h.options.SwaggerJSON = defaultOpenAPIPath
+	}
+
+	fmt.Println("content: ", string(openFileHandler.Content))
+	r.Handle(defaultOpenAPIPath, openFileHandler).Methods("GET")
 
 	js, err := json.Marshal(h.options)
 	if err != nil {
@@ -59,8 +79,38 @@ func NewHandler(handlerOpts ...HandlerOption) http.Handler {
 	}
 
 	h.staticServer = http.StripPrefix(h.BasePath, http.FileServer(http.FS(stripped)))
+	r.PathPrefix(h.BasePath).Handler(h)
 
-	return h
+	return r
+}
+
+type openFileHandler struct {
+	Content []byte
+}
+
+func (h *openFileHandler) load(filePath string) ([]byte, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	content, err := io.ReadAll(file)
+	return content, err
+}
+
+func (h *openFileHandler) ServeHTTP(writer http.ResponseWriter, _ *http.Request) {
+	_, _ = writer.Write(h.Content)
+}
+
+// handler handles swagger UI request.
+type handler struct {
+	*options
+
+	ConfigJSON template.JS
+
+	tpl          *template.Template
+	staticServer http.Handler
 }
 
 // IndexTpl creates page template.
@@ -84,9 +134,9 @@ func (h *handler) LoadIndexTpl() error {
 		"validatorUrl":             `"https://validator.swagger.io/validator"`,
 		"defaultModelsExpandDepth": "1", // Hides schemas, override with value "1" in Config.SettingsUI to show schemas.
 		`onComplete`: `function() {
-                if (cfg.preAuthorizeApiKey) {
-                    for (var name in cfg.preAuthorizeApiKey) {
-                        ui.preauthorizeApiKey(name, cfg.preAuthorizeApiKey[name]);
+                if (conf.preAuthorizeApiKey) {
+                    for (var name in conf.preAuthorizeApiKey) {
+                        ui.preauthorizeApiKey(name, conf.preAuthorizeApiKey[name]);
                     }
                 }
 
