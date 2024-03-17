@@ -20,7 +20,7 @@ var (
 // NewHandler creates HTTP handler for Swagger UI.
 func NewHandler(handlerOpts ...HandlerOption) http.Handler {
 	opts := &options{
-		basePath: "/q/swagger-ui",
+		basePath: "/q/swagger-ui/",
 	}
 
 	r := mux.NewRouter()
@@ -33,11 +33,6 @@ func NewHandler(handlerOpts ...HandlerOption) http.Handler {
 		options: opts,
 	}
 
-	if h.RewritePrefix != "" {
-		h.basePath = h.RewritePrefix + h.basePath
-		defaultOpenAPIPath = h.RewritePrefix + defaultOpenAPIPath
-	}
-
 	openFileHandler := &openFileHandler{
 		Content: []byte("There is your openapi.yaml file."),
 	}
@@ -48,7 +43,11 @@ func NewHandler(handlerOpts ...HandlerOption) http.Handler {
 			panic(err)
 		}
 		openFileHandler.Content = content
+
 		h.options.SwaggerJSON = defaultOpenAPIPath
+		if h.RewritePrefix != "" {
+			h.options.SwaggerJSON = h.RewritePrefix + defaultOpenAPIPath
+		}
 	}
 
 	r.Handle(defaultOpenAPIPath, openFileHandler).Methods("GET")
