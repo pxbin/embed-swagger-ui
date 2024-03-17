@@ -1,7 +1,7 @@
 package openapiv3
 
 type options struct {
-	basePath    string `json:"basePath"`       // Base URL to docs.
+	basePath    string // Base URL to docs.
 	Title       string `json:"title"`          // Title of index file.
 	SwaggerJSON string `json:"swaggerJsonUrl"` // URL to openapi.json/swagger.json document specification.
 
@@ -19,6 +19,7 @@ type options struct {
 	// See https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/ for available options.
 	SettingsUI map[string]string `json:"-"`
 
+	RewritePrefix    string `json:"-"` // Rewrite prefix for nginx or Kubernetes Nginx Ingress.
 	LocalOpenAPIFile string `json:"-"` // Local openapi file path.
 }
 
@@ -95,5 +96,11 @@ func WithSettingsUI(settings map[string]string) HandlerOption {
 func WithLocalFile(filePath string) HandlerOption {
 	return func(opt *options) {
 		opt.LocalOpenAPIFile = filePath
+	}
+}
+
+func WithRewritePrefix(prefix string) HandlerOption {
+	return func(opt *options) {
+		opt.RewritePrefix = prefix
 	}
 }
