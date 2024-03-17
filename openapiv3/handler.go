@@ -166,10 +166,10 @@ func (h *handler) LoadIndexTpl() error {
 <head>
     <meta charset="UTF-8">
     <title>{{ .Title }} - Swagger UI</title>
-    <link rel="stylesheet" type="text/css" href="./q/swagger-ui/swagger-ui.css" />
+    <link rel="stylesheet" type="text/css" href="./swagger-ui.css" />
     <link rel="stylesheet" type="text/css" href="index.css" />
-    <link rel="icon" type="image/png" href="./q/swagger-ui/favicon-32x32.png" sizes="32x32" />
-    <link rel="icon" type="image/png" href="./q/swagger-ui/favicon-16x16.png" sizes="16x16" />
+    <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16" />
     <style>
         html {
             box-sizing: border-box;
@@ -193,8 +193,8 @@ func (h *handler) LoadIndexTpl() error {
 <body>
 <div id="swagger-ui"></div>
 
-<script src="./q/swagger-ui/swagger-ui-bundle.js" charset="UTF-8"> </script>
-<script src="./q/swagger-ui/swagger-ui-standalone-preset.js" charset="UTF-8"> </script>
+<script src="./swagger-ui-bundle.js" charset="UTF-8"> </script>
+<script src="./swagger-ui-standalone-preset.js" charset="UTF-8"> </script>
 
 <script>
     window.onload = function () {
